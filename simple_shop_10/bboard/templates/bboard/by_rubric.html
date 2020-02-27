@@ -1,24 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
-    <title>{{ current_rubric.name }} - List of ADS</title>
-</head>
-<body>
-    <h1>Advertisement</h1>
-    <h2>Rubric: {{ current_rubric.name }}</h2>
-    <div>
-        <a href="{% url 'index' %}">Home</a>
-        {% for rubric in rubrics %}
-        <a href="{% url 'by_rubric' rubric.pk %}">{{ rubric.name }}</a>
-        {% endfor %}
-    </div>
-    {% for ad in ads %}
-    <div>
-        <h2>{{ ad.title }}</h2>
-        <p>{{ ad.content }}</p>
-        <p>{{ ad.published|date:"d.m.Y H:i:s" }}</p>
-    </div>
-    {% endfor %}
-</body>
-</html>
+{% extends "bboard/layout/basic.html" %}
+
+{% block title %}{{ current_rubric.name }}{% endblock %}
+
+{% block content %}
+<h2>Rubric: {{ current_rubric.name }}</h2>
+{% for ad in ads %}
+<div>
+    <h2>{{ ad.title }}</h2>
+    <p>{{ ad.content }}</p>
+    <p>{{ ad.published|date:"d.m.Y H:i:s" }}</p>
+</div>
+{% endfor %}
+{% endblock %}

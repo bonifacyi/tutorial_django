@@ -1,8 +1,20 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.template import loader
+from django.views.generic.edit import CreateView
+from django.urls import reverse_lazy
 
 from .models import AdsBoard, Rubric
+from .forms import AdsForm
+
+
+class AdsCreateView(CreateView):
+    template_name = 'bboard/create.html'
+    form_class = AdsForm
+    success_url = reverse_lazy('index')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['rubrics'] = Rubric.objects.all()
+        return context
 
 
 def index(request):

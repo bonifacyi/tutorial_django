@@ -2,23 +2,20 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
-    <title>Home - List of ADS</title>
+    <title>Add ads - List of ADS</title>
 </head>
 <body>
-    <h1>Advertisement</h1>
+    <h1>Add ADS</h1>
     <div>
         <a href="{% url 'index' %}">Home</a>
-        <a href="{% url 'add' %}">Add</a>
         {% for rubric in rubrics %}
         <a href="{% url 'by_rubric' rubric.pk %}">{{ rubric.name }}</a>
         {% endfor %}
     </div>
-    {% for ad in ads %}
-    <div>
-        <h2>{{ ad.title }}</h2>
-        <p>{{ ad.content }}</p>
-        <p>{{ ad.published|date:"d.m.Y H:i:s" }}</p>
-    </div>
-    {% endfor %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Add">
+    </form>
 </body>
 </html>

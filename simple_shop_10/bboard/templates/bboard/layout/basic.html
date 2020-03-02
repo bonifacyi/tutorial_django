@@ -1,6 +1,8 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
+    <link rel="stylesheet" type="text/css" href="{% static 'bboard/style.css' %}">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
     <title>{% block title %}Home{% endblock %} - List of ADS</title>
 </head>
@@ -10,7 +12,7 @@
         <a href="{% url 'index' %}">Home</a>
         <a href="{% url 'add' %}">Add</a>
         {% for rubric in rubrics %}
-        <a href="{% url 'by_rubric' rubric.pk %}">{{ rubric.name }}</a>
+        <a href="{{ rubric.get_absolute_url }}">{{ rubric.name }}</a>
         {% endfor %}
     </nav>
     <section>

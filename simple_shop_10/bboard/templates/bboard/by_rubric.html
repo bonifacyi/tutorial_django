@@ -6,7 +6,7 @@
 <h2>Rubric: {{ current_rubric.name }}</h2>
 {% for ad in ads %}
 <div>
-    <h2>{{ ad.title }}</h2>
+    <h2>{{ ad.title_and_price }}</h2>
     <p>{{ ad.content }}</p>
     <p>{{ ad.published|date:"d.m.Y H:i:s" }}</p>
 </div>

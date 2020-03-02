@@ -3,7 +3,7 @@
 {% block content %}
 {% for ad in ads %}
 <div class="ads">
-    <h2>{{ ad.title }}</h2>
+    <h2>{{ ad.title_and_price }}</h2>
     <p>{{ ad.content }}</p>
     <p><a href="{% url 'by_rubric' ad.rubric.pk %}">{{ ad.rubric.name }}</a></p>
     <p>{{ ad.published|date:"d.m.Y H:i:s" }}</p>

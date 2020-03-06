@@ -72,7 +72,7 @@ def post_list(request, tag_slug=None):
     return render(request, 'blog/post/list.html', context)
 
 
-def post_detail(request, year, month, day, post):
+def post_detail(request, year, month, day, post, page_number):
     post = get_object_or_404(
         Post, slug=post, status='published',
         publish__year=year, publish__month=month, publish__day=day
@@ -105,6 +105,7 @@ def post_detail(request, year, month, day, post):
         'new_comment': new_comment,
         'comment_form': comment_form,
         'similar_posts': similar_posts,
+        'page_number': page_number,
     }
     search_context = search_template(request)
     if search_context['query']:

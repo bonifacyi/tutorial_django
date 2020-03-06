@@ -28,3 +28,8 @@ def get_most_commented_posts(count=5):
 @register.filter(name='markdown')
 def markdown_format(text):
     return mark_safe(markdown.markdown(text))
+
+
+@register.simple_tag
+def get_url_and_safe_page(post, page_number=1):
+    return post.get_absolute_url(page_number)

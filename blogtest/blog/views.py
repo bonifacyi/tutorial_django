@@ -4,9 +4,15 @@ from django.views.generic import ListView
 from django.core.mail import send_mail
 from taggit.models import Tag
 from django.db.models import Count
+from django.contrib.postgres.search import SearchVector
 
 from .models import Post, Comment
-from .forms import EmailPostForm, CommentForm
+from .forms import EmailPostForm, CommentForm, SearchForm
+
+
+def post_search(request):
+    search_context = search_template(request)
+    return render(request, 'blog/post/search.html', search_context)
 
 
 """class PostListView(ListView):
@@ -16,14 +22,24 @@ from .forms import EmailPostForm, CommentForm
     template_name = 'blog/post/list.html'"""
 
 
-def post_list(request, tag_slug=None):
-    object_list = Post.published.all()
-    tag = None
+def search_template(request):
+    search_form = SearchForm()
+    query = None
+    results = []
+    if 'query' in request.GET:
+        search_form = SearchForm(request.GET)
+        if search_form.is_valid():
+            query = search_form.cleaned_data['query']
+            results = Post.objects.annotate(search=SearchVector('title', 'body'), ).filter(search=query)
+            search_form = SearchForm()
+    return {
+        'search_form': search_form,
+        'query': query,
+        'results': results,
+    }
 
-    if tag_slug:
-        tag = get_object_or_404(Tag, slug=tag_slug)
-        object_list = object_list.filter(tags__in=[tag])
 
+def pagination(request, object_list):
     paginator = Paginator(object_list, 5)  # По 5 статьи на каждой странице.
     page = request.GET.get('page')
     try:
@@ -34,11 +50,28 @@ def post_list(request, tag_slug=None):
     except EmptyPage:
         # Если номер страницы больше, чем общее количество страниц, возвращаем последнюю.
         posts = paginator.page(paginator.num_pages)
+    return page, posts
+
+
+def post_list(request, tag_slug=None):
+    object_list = Post.published.all()
+    tag = None
+
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        object_list = object_list.filter(tags__in=[tag])
+
+    page, posts = pagination(request, object_list)
     context = {
         'page': page,
         'posts': posts,
         'tag': tag,
     }
+    search_context = search_template(request)
+    if search_context['query']:
+        return render(request, 'blog/post/search.html', search_context)
+
+    context.update(search_context)
     return render(request, 'blog/post/list.html', context)
 
 
@@ -76,6 +109,11 @@ def post_detail(request, year, month, day, post):
         'comment_form': comment_form,
         'similar_posts': similar_posts,
     }
+    search_context = search_template(request)
+    if search_context['query']:
+        return render(request, 'blog/post/search.html', search_context)
+
+    context.update(search_context)
     return render(request, 'blog/post/detail.html', context)
 
 
@@ -99,9 +137,15 @@ def post_share(request, post_id):
             sent = True
     else:
         form = EmailPostForm()
+
     context = {
         'post': post,
         'form': form,
         'sent': sent,
     }
+    search_context = search_template(request)
+    if search_context['query']:
+        return render(request, 'blog/post/search.html', search_context)
+
+    context.update(search_context)
     return render(request, 'blog/post/share.html', context)

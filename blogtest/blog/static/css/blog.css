@@ -48,6 +48,10 @@ p.date {
 }
 
 /* forms */
+.search {
+	display:block;
+	height:90px;
+}
 label { 
     float:left;
     clear:both;
@@ -58,7 +62,7 @@ input, textarea {
     clear:both;
     float:left;
     margin:0 0 10px;
-    background:#ededed;
+    background:#82e2fa;
     border:0;
     padding:6px 10px;
     font-size:12px;
@@ -67,7 +71,7 @@ input[type=submit] {
     font-weight:bold;
     background:#00abff;
     color:#fff;
-    padding:10px 20px;
+    padding:5px 15px;
     font-size:14px;
     text-transform:uppercase; 
 }

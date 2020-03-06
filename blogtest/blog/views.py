@@ -4,22 +4,10 @@ from django.views.generic import ListView
 from django.core.mail import send_mail
 from taggit.models import Tag
 from django.db.models import Count
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity
 
 from .models import Post, Comment
 from .forms import EmailPostForm, CommentForm, SearchForm
-
-
-def post_search(request):
-    search_context = search_template(request)
-    return render(request, 'blog/post/search.html', search_context)
-
-
-"""class PostListView(ListView):
-    queryset = Post.published.all()
-    context_object_name = 'posts'
-    paginate_by = 3
-    template_name = 'blog/post/list.html'"""
 
 
 def search_template(request):
@@ -30,7 +18,11 @@ def search_template(request):
         search_form = SearchForm(request.GET)
         if search_form.is_valid():
             query = search_form.cleaned_data['query']
-            results = Post.objects.annotate(search=SearchVector('title', 'body'), ).filter(search=query)
+            search_vector = SearchVector('title', weight='A') + SearchVector('body', weight='B')
+            search_query = SearchQuery(query)
+            results = Post.objects.annotate(
+                rank=SearchRank(search_vector, search_query)
+            ).filter(rank__gte=0.2).order_by('-rank')
             search_form = SearchForm()
     return {
         'search_form': search_form,
@@ -51,6 +43,11 @@ def pagination(request, object_list):
         # Если номер страницы больше, чем общее количество страниц, возвращаем последнюю.
         posts = paginator.page(paginator.num_pages)
     return page, posts
+
+
+def post_search(request):
+    search_context = search_template(request)
+    return render(request, 'blog/post/search.html', search_context)
 
 
 def post_list(request, tag_slug=None):

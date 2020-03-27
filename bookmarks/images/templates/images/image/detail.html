@@ -32,8 +32,8 @@
         <div class="image-likes">
             {% for user in image.users_like.all %}
                 <div>
-
-                    <p>{{ user.first_name }}</p>
+                    <img src="{{ user.profile.photo.url }}" alt="">
+                    <p>{{ user.get_full_name }}</p>
                 </div>
                 {% empty %}
                 Nobody likes this image yet.

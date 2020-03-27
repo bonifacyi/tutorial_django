@@ -33,7 +33,8 @@ class Contact(models.Model):
 # Динамическое добавление поля following в модель User
 User.add_to_class(
     'following',
-    models.ManyToManyField('self',
-                           through=Contact,
-                           related_name='followers',
-                           symmetrical=False))
+    models.ManyToManyField(
+        'self',
+        through=Contact,
+        related_name='followers',
+        symmetrical=False))

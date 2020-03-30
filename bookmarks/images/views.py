@@ -9,6 +9,14 @@ from .models import Image
 from .forms import ImageCreateForm
 from common.decorators import ajax_required
 from actions.utils import create_action
+import redis
+from django.conf import settings
+
+# Подключение к Redis.
+redis_db = redis.StrictRedis(
+    host=settings.REDIS_HOST,
+    port=settings.REDIS_PORT,
+    db=settings.REDIS_DB)
 
 
 @login_required
@@ -39,11 +47,29 @@ def image_create(request):
 
 def image_detail(request, id, slug):
     image = get_object_or_404(Image, id=id, slug=slug)
+    # Увеличиваем количество просмотров картинки на 1.
+    total_views = redis_db.incr('image:{}:views'.format(image.id))
+    # Увеличиваем рейтинг картинки на 1.
+    # redis_db.zincrby('image_ranking', 1, image.id)
+    redis_db.zadd('image_ranking', {image.id: total_views})
+    context = {
+        'section': 'images',
+        'image': image,
+        'total_views': total_views,
+    }
+    return render(request, 'images/image/detail.html', context)
+
+
+@login_required
+def image_ranking(request):
+    # Получаем набор рейтинга картинок.
+    image_ranking_scores = redis_db.zrange('image_ranking', 0, -1, desc=True, withscores=True)[:10]
+    # Получаем отсортированный список самых популярных картинок.
+    most_viewed = [Image.objects.get(id=id_) for id_, s in image_ranking_scores]
     return render(
         request,
-        'images/image/detail.html',
-        {'section': 'images', 'image': image},
-    )
+        'images/image/ranking.html',
+        {'section': 'images', 'most_viewed': most_viewed})
 
 
 @ajax_required
